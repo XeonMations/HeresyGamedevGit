@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class ParkourCameraController : MonoBehaviour
 {
+    [SerializeField] private ParkourWallRunning wallRun;
+
     [SerializeField] private float sensX;
     [SerializeField] private float sensY;
 
-    [SerializeField] private Camera cam;
+    [SerializeField] private Transform cam;
+    [SerializeField] private Transform orientation;
 
     private float mouseX;
     private float mouseY;
@@ -29,8 +32,8 @@ public class ParkourCameraController : MonoBehaviour
         MyInput();
 
         //modify camera rotation based off of variables in MyInput
-        cam.transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
-        transform.rotation = Quaternion.Euler(0, yRotation, 0);
+        cam.transform.rotation = Quaternion.Euler(xRotation, yRotation, wallRun.tilt);
+        orientation.transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
 
     private void MyInput()
