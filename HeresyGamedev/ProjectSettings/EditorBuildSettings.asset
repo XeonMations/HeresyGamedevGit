@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Willoguns/Scenes/PrototypingScene.unity
+    path: Assets/Willoguns/ShooterLevel/Scenes/PrototypingScene.unity
     guid: 6bf1af3b4872ccb47baf8075fcada1d4
   m_configObjects: {}
