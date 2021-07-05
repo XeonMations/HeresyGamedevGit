@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ParkourWallRunning : MonoBehaviour
 {
+    [SerializeField] private ParkourPlayerMovement movementScript;
     [SerializeField] private Transform orientation;
 
     [Header("Wall Running")]
@@ -11,6 +12,8 @@ public class ParkourWallRunning : MonoBehaviour
     [SerializeField] private float minimumJumpHeight = 1.5f;
     [SerializeField] private float wallRunGravity;
     [SerializeField] private float wallRunJumpForce;
+    [SerializeField] private float wallRunSpeedMultiplier;
+    private float wallRunTimer;
 
     [Header("Camera")]
     [SerializeField] private Camera cam;
@@ -24,6 +27,9 @@ public class ParkourWallRunning : MonoBehaviour
 
     private bool wallLeft = false;
     private bool wallRight = false;
+    private bool setJump = false;
+
+    public bool isWallRun { get; private set; }
 
     [SerializeField] private Rigidbody rb;
 
@@ -69,8 +75,20 @@ public class ParkourWallRunning : MonoBehaviour
     private void StartWallRun()
     {
         rb.useGravity = false;
+        setJump = true;
+        movementScript.doubleJump = false;
 
-        rb.AddForce(Vector3.down * wallRunGravity, ForceMode.Force);
+        wallRunTimer += Time.deltaTime;
+        if(wallRunTimer >= 3)
+        {
+            rb.AddForce(Vector3.down * wallRunGravity, ForceMode.Force);
+        }
+
+        if(wallRunTimer >= 5)
+        {
+            StopWallRun();
+            return;
+        }
 
         cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, wallRunFov, wallRunFovTime * Time.deltaTime);
 
@@ -103,6 +121,15 @@ public class ParkourWallRunning : MonoBehaviour
     private void StopWallRun()
     {
         rb.useGravity = true;
+
+        if(setJump)
+        {
+            movementScript.doubleJump = true;
+            setJump = false;
+        }
+
+        isWallRun = false;
+        wallRunTimer = 0;
 
         cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, fov, wallRunFovTime * Time.deltaTime);
         tilt = Mathf.Lerp(tilt, 0, camTiltTime * Time.deltaTime);

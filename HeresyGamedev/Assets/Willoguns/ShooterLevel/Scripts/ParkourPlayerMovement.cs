@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ParkourPlayerMovement : MonoBehaviour
 {
+    [SerializeField] private ParkourWallRunning wallRun;
     [SerializeField] private Transform orientation;
 
     [Header("Movement")]
@@ -15,7 +16,9 @@ public class ParkourPlayerMovement : MonoBehaviour
     [Header("Sprinting")]
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float sprintSpeed = 6f;
+    [SerializeField] private float wallRunSpeed = 10f;
     [SerializeField] private float acceleration = 10f;
+    [SerializeField] private float wallRunAccelMultiplier;
 
     [Header("KeyBinds")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
@@ -25,6 +28,7 @@ public class ParkourPlayerMovement : MonoBehaviour
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private Transform groundCheck;
+    public bool doubleJump { private get; set; }
 
     [Header("Drag")]
     [SerializeField] private float groundDrag = 6f;
@@ -65,11 +69,16 @@ public class ParkourPlayerMovement : MonoBehaviour
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
+        if(isGrounded)
+        {
+            doubleJump = true;
+        }
+
         MyInput();
         ControlDrag();
         ControlSpeed();
 
-        if(Input.GetKeyDown(jumpKey) && isGrounded)
+        if(Input.GetKeyDown(jumpKey))
         {
             Jump();
         }
@@ -83,6 +92,7 @@ public class ParkourPlayerMovement : MonoBehaviour
         verticalMovement = Input.GetAxisRaw("Vertical");
 
         moveDirection = orientation.forward * verticalMovement + orientation.right * horizontalMovement;
+        Debug.Log(moveDirection);
     }
 
     private void Jump()
@@ -92,15 +102,24 @@ public class ParkourPlayerMovement : MonoBehaviour
             rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
             rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         }
+        else if(doubleJump)
+        {
+            rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+            doubleJump = false;
+        }
     }
 
     private void ControlSpeed()
     {
-        if (Input.GetKey(sprintKey) && isGrounded)
+        if(Input.GetKey(sprintKey) && isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
         }
-        else
+        else if(wallRun.isWallRun)
+        {
+            moveSpeed = Mathf.Lerp(moveSpeed, wallRunSpeed, (acceleration * wallRunAccelMultiplier) * Time.deltaTime);
+        }
+        else if(isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, walkSpeed, acceleration * Time.deltaTime);
         }
