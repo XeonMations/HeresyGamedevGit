@@ -19,6 +19,8 @@ public class ParkourPlayerMovement : MonoBehaviour
     [SerializeField] private float wallRunSpeed = 10f;
     [SerializeField] private float acceleration = 10f;
     [SerializeField] private float wallRunAccelMultiplier;
+    public bool isSprinting { get; set; }
+    public bool canSprint { get; set; }
 
     [Header("KeyBinds")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
@@ -92,7 +94,6 @@ public class ParkourPlayerMovement : MonoBehaviour
         verticalMovement = Input.GetAxisRaw("Vertical");
 
         moveDirection = orientation.forward * verticalMovement + orientation.right * horizontalMovement;
-        Debug.Log(moveDirection);
     }
 
     private void Jump()
@@ -111,17 +112,20 @@ public class ParkourPlayerMovement : MonoBehaviour
 
     private void ControlSpeed()
     {
-        if(Input.GetKey(sprintKey) && isGrounded)
+        if(Input.GetKey(sprintKey) && isGrounded && canSprint)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed, acceleration * Time.deltaTime);
+            isSprinting = true;
         }
         else if(wallRun.isWallRun)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, wallRunSpeed, (acceleration * wallRunAccelMultiplier) * Time.deltaTime);
+            isSprinting = false;
         }
         else if(isGrounded)
         {
             moveSpeed = Mathf.Lerp(moveSpeed, walkSpeed, acceleration * Time.deltaTime);
+            isSprinting = false;
         }
     }
 
